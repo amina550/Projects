@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Grade Calculator · Amina</title>
+    <meta name="description" content="An interactive student GPA calculator with dark mode, course management, and instant results." />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+
+    <!-- ═══════════════════════ HEADER ═══════════════════════ -->
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="header-brand">
+          <span class="brand-icon" aria-hidden="true">🎓</span>
+          <div>
+            <h1 class="brand-title">Grade Calculator</h1>
+            <p class="brand-subtitle">by Amina · AAU CTBE · Software Engineering</p>
+          </div>
+        </div>
+
+        <div class="header-controls">
+          <!-- GPA badge -->
+          <div class="gpa-badge" id="gpa-badge" aria-live="polite" aria-label="Current GPA">
+            <span class="gpa-badge__label">GPA</span>
+            <span class="gpa-badge__value" id="live-gpa">—</span>
+          </div>
+
+          <!-- Dark mode toggle -->
+          <button
+            class="theme-toggle"
+            id="theme-toggle"
+            aria-label="Toggle dark mode"
+            title="Toggle dark mode"
+            type="button"
+          >
+            <span class="theme-toggle__icon theme-toggle__icon--light" aria-hidden="true">☀️</span>
+            <span class="theme-toggle__icon theme-toggle__icon--dark" aria-hidden="true">🌙</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══════════════════════ MAIN ═══════════════════════ -->
+    <main class="main-layout">
+
+      <!-- ─── LEFT PANEL: Course list ─── -->
+      <section class="panel panel--courses" aria-labelledby="courses-heading">
+        <div class="panel-header">
+          <h2 class="panel-title" id="courses-heading">My Courses</h2>
+          <span class="course-count badge" id="course-count" aria-live="polite">0 courses</span>
+        </div>
+
+        <!-- Add / Load controls -->
+        <div class="course-actions">
+          <button class="btn btn--primary btn--icon" id="btn-add-course" type="button">
+            <span aria-hidden="true">＋</span> Add Course
+          </button>
+          <button class="btn btn--outline btn--icon" id="btn-load-example" type="button">
+            <span aria-hidden="true">📋</span> Load Example
+          </button>
+          <button class="btn btn--ghost btn--icon btn--danger" id="btn-clear-all" type="button">
+            <span aria-hidden="true">🗑️</span> Clear All
+          </button>
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="empty-state" aria-hidden="false">
+          <div class="empty-state__icon" aria-hidden="true">📚</div>
+          <p class="empty-state__text">No courses yet.</p>
+          <p class="empty-state__hint">Click <strong>Add Course</strong> or load the example data to get started.</p>
+        </div>
+
+        <!-- Course list -->
+        <ul class="course-list" id="course-list" aria-label="Course list" role="list"></ul>
+      </section>
+
+      <!-- ─── RIGHT PANEL: Results + Form ─── -->
+      <aside class="panel panel--results" aria-label="GPA results and course form">
+
+        <!-- Add / Edit Course form -->
+        <div class="card form-card" id="form-card" aria-hidden="true">
+          <h3 class="card-title" id="form-title">Add Course</h3>
+
+          <form id="course-form" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="input-code">Course Code <abbr title="required">*</abbr></label>
+              <input
+                class="form-input"
+                type="text"
+                id="input-code"
+                name="code"
+                placeholder="e.g. SE201"
+                maxlength="10"
+                autocomplete="off"
+                required
+              />
+              <span class="form-error" id="error-code" role="alert" aria-live="polite"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="input-name">Course Name <abbr title="required">*</abbr></label>
+              <input
+                class="form-input"
+                type="text"
+                id="input-name"
+                name="name"
+                placeholder="e.g. Data Structures"
+                maxlength="50"
+                autocomplete="off"
+                required
+              />
+              <span class="form-error" id="error-name" role="alert" aria-live="polite"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="input-credits">Credit Hours <abbr title="required">*</abbr></label>
+              <input
+                class="form-input"
+                type="number"
+                id="input-credits"
+                name="credits"
+                placeholder="e.g. 3"
+                min="1"
+                max="10"
+                step="1"
+                required
+              />
+              <span class="form-error" id="error-credits" role="alert" aria-live="polite"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="input-score">Overall Score (0 – 100)</label>
+              <input
+                class="form-input"
+                type="number"
+                id="input-score"
+                name="score"
+                placeholder="e.g. 82.5"
+                min="0"
+                max="100"
+                step="0.1"
+              />
+              <span class="form-error" id="error-score" role="alert" aria-live="polite"></span>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn--primary" type="submit" id="btn-submit-form">Save Course</button>
+              <button class="btn btn--ghost" type="button" id="btn-cancel-form">Cancel</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- GPA Result card -->
+        <div class="card results-card" id="results-card">
+          <h3 class="card-title">Semester GPA</h3>
+
+          <div class="gpa-display" id="gpa-display" aria-live="polite">
+            <div class="gpa-circle" id="gpa-circle">
+              <span class="gpa-value" id="gpa-value">—</span>
+              <span class="gpa-label">/ 4.00</span>
+            </div>
+            <div class="gpa-meta">
+              <p class="gpa-standing" id="gpa-standing">Add courses to calculate your GPA</p>
+              <div class="gpa-stats">
+                <div class="gpa-stat">
+                  <span class="gpa-stat__label">Total Credits</span>
+                  <span class="gpa-stat__value" id="stat-credits">—</span>
+                </div>
+                <div class="gpa-stat">
+                  <span class="gpa-stat__label">Courses</span>
+                  <span class="gpa-stat__value" id="stat-courses">—</span>
+                </div>
+                <div class="gpa-stat">
+                  <span class="gpa-stat__label">Avg Score</span>
+                  <span class="gpa-stat__value" id="stat-avg">—</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grade distribution bar -->
+          <div class="grade-distribution" id="grade-distribution" aria-label="Grade distribution" hidden>
+            <h4 class="distribution-title">Grade Distribution</h4>
+            <div class="distribution-bars" id="distribution-bars" role="list"></div>
+          </div>
+        </div>
+
+        <!-- Grade scale reference -->
+        <div class="card grade-scale-card">
+          <h3 class="card-title">Grade Scale (AAU)</h3>
+          <div class="grade-scale-table" role="table" aria-label="AAU grade scale">
+            <div class="grade-scale-table__head" role="row">
+              <span role="columnheader">Score</span>
+              <span role="columnheader">Grade</span>
+              <span role="columnheader">Points</span>
+            </div>
+            <div class="grade-scale-table__body" id="grade-scale-body" role="rowgroup"></div>
+          </div>
+        </div>
+
+      </aside>
+    </main>
+
+    <!-- ═══════════════════════ DELETE CONFIRM DIALOG ═══════════════════════ -->
+    <dialog class="confirm-dialog" id="confirm-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-desc">
+      <div class="dialog-inner">
+        <h2 class="dialog-title" id="dialog-title">Delete Course?</h2>
+        <p class="dialog-desc" id="dialog-desc">This action cannot be undone.</p>
+        <div class="dialog-actions">
+          <button class="btn btn--danger" id="dialog-confirm" type="button">Yes, Delete</button>
+          <button class="btn btn--ghost" id="dialog-cancel" type="button">Cancel</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- ═══════════════════════ TOAST ═══════════════════════ -->
+    <div class="toast-container" id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
