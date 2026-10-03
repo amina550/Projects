@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Al-Quran — Digital Mushaf</title>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       FONTS
+       Amiri  → beautiful classical Arabic calligraphy
+       Lato   → clean sans-serif for English / UI chrome
+  ════════════════════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       CSS  ── all styles live here, organised into named sections
+  ════════════════════════════════════════════════════════════════ -->
+  <style>
+    /* ──────────────────────────────────────────────────────────────
+       1. DESIGN TOKENS  (CSS custom properties)
+          Light theme is the default; dark theme overrides these.
+    ────────────────────────────────────────────────────────────── */
+    :root {
+      /* Palette */
+      --clr-bg:          #f8f6f0;
+      --clr-sidebar-bg:  #1a2a40;
+      --clr-sidebar-text:#d4e3f5;
+      --clr-sidebar-muted:#8aadcc;
+      --clr-sidebar-hover:#243756;
+      --clr-sidebar-active:#2e4a6e;
+      --clr-accent:      #c9a84c;       /* warm gold */
+      --clr-accent-soft: #f5e9c8;
+      --clr-surface:     #ffffff;
+      --clr-border:      #e2ddd5;
+      --clr-text:        #2c2c2c;
+      --clr-text-muted:  #7a7a7a;
+      --clr-verse-bg:    #fdfcf8;
+      --clr-verse-hover: #f5f0e8;
+      --clr-error-bg:    #fff3f3;
+      --clr-error-border:#f5c2c2;
+      --clr-error-text:  #b53e3e;
+
+      /* Typography */
+      --font-arabic:  'Amiri', serif;
+      --font-ui:      'Lato', sans-serif;
+
+      /* Sizing / spacing */
+      --sidebar-width: 300px;
+      --radius-sm:  6px;
+      --radius-md:  12px;
+      --radius-lg:  18px;
+      --shadow-sm:  0 1px 4px rgba(0,0,0,.08);
+      --shadow-md:  0 4px 20px rgba(0,0,0,.10);
+
+      /* Transitions */
+      --transition: .25s ease;
+    }
+
+    /* Dark-mode token overrides */
+    html.dark {
+      --clr-bg:          #0f1923;
+      --clr-sidebar-bg:  #090f16;
+      --clr-sidebar-text:#c5d8f0;
+      --clr-sidebar-muted:#607a96;
+      --clr-sidebar-hover:#161f2e;
+      --clr-sidebar-active:#1e2f46;
+      --clr-accent:      #d4aa5a;
+      --clr-accent-soft: #2a2215;
+      --clr-surface:     #161f2e;
+      --clr-border:      #243044;
+      --clr-text:        #e8e4da;
+      --clr-text-muted:  #8a9bb0;
+      --clr-verse-bg:    #131b28;
+      --clr-verse-hover: #1c2840;
+      --clr-error-bg:    #2a1515;
+      --clr-error-border:#5c2c2c;
+      --clr-error-text:  #e57373;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       2. RESET & BASE
+    ────────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: var(--font-ui);
+      background-color: var(--clr-bg);
+      color: var(--clr-text);
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;          /* dynamic viewport height */
+      overflow: hidden;
+      transition: background-color var(--transition), color var(--transition);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       3. TOP NAV BAR
+    ────────────────────────────────────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 20px;
+      height: 58px;
+      background: var(--clr-sidebar-bg);
+      color: var(--clr-sidebar-text);
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+      z-index: 100;
+    }
+
+    .topbar__logo {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--clr-accent);
+      letter-spacing: .5px;
+      white-space: nowrap;
+    }
+
+    .topbar__logo span {
+      color: var(--clr-sidebar-text);
+      font-weight: 300;
+    }
+
+    /* Hamburger — visible on mobile */
+    .topbar__burger {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--clr-sidebar-text);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: var(--radius-sm);
+      font-size: 1.5rem;
+      line-height: 1;
+      transition: background var(--transition);
+    }
+    .topbar__burger:hover { background: var(--clr-sidebar-hover); }
+
+    .topbar__spacer { flex: 1; }
+
+    /* Dark-mode toggle */
+    .dark-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: none;
+      border: 1px solid var(--clr-sidebar-muted);
+      color: var(--clr-sidebar-text);
+      border-radius: 20px;
+      padding: 5px 14px;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: .8rem;
+      transition: background var(--transition), border-color var(--transition);
+      white-space: nowrap;
+    }
+    .dark-toggle:hover { background: var(--clr-sidebar-hover); border-color: var(--clr-accent); }
+
+    .dark-toggle__icon { font-size: 1rem; }
+
+    /* ──────────────────────────────────────────────────────────────
+       4. MAIN LAYOUT — sidebar + content panel
+    ────────────────────────────────────────────────────────────── */
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-width);
+      flex-shrink: 0;
+      background: var(--clr-sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: transform var(--transition), width var(--transition);
+    }
+
+    .sidebar__search-wrap {
+      padding: 14px 14px 10px;
+      flex-shrink: 0;
+    }
+
+    .sidebar__search {
+      width: 100%;
+      padding: 9px 14px 9px 36px;
+      border: 1px solid var(--clr-sidebar-hover);
+      border-radius: 20px;
+      background: rgba(255,255,255,.07);
+      color: var(--clr-sidebar-text);
+      font-family: var(--font-ui);
+      font-size: .85rem;
+      outline: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238aadcc' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 12px center;
+      transition: border-color var(--transition);
+    }
+    .sidebar__search::placeholder { color: var(--clr-sidebar-muted); }
+    .sidebar__search:focus { border-color: var(--clr-accent); }
+
+    .sidebar__label {
+      padding: 6px 16px 4px;
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--clr-sidebar-muted);
+      flex-shrink: 0;
+    }
+
+    .sidebar__list {
+      list-style: none;
+      overflow-y: auto;
+      flex: 1;
+      /* Custom scrollbar */
+      scrollbar-width: thin;
+      scrollbar-color: var(--clr-sidebar-hover) transparent;
+    }
+    .sidebar__list::-webkit-scrollbar { width: 5px; }
+    .sidebar__list::-webkit-scrollbar-thumb { background: var(--clr-sidebar-hover); border-radius: 3px; }
+
+    .sidebar__item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: background var(--transition);
+      border-left: 3px solid transparent;
+    }
+    .sidebar__item:hover  { background: var(--clr-sidebar-hover); }
+    .sidebar__item.active {
+      background: var(--clr-sidebar-active);
+      border-left-color: var(--clr-accent);
+    }
+
+    .sidebar__num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--clr-accent);
+      flex-shrink: 0;
+    }
+    .sidebar__item.active .sidebar__num { background: var(--clr-accent); color: #fff; }
+
+    .sidebar__info { flex: 1; overflow: hidden; }
+    .sidebar__name-en {
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--clr-sidebar-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sidebar__meta {
+      font-size: .7rem;
+      color: var(--clr-sidebar-muted);
+      margin-top: 1px;
+    }
+
+    .sidebar__name-ar {
+      font-family: var(--font-arabic);
+      font-size: 1rem;
+      color: var(--clr-accent);
+      flex-shrink: 0;
+    }
+
+    /* ── Content panel ── */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px 40px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--clr-border) transparent;
+    }
+    .content::-webkit-scrollbar { width: 6px; }
+    .content::-webkit-scrollbar-thumb { background: var(--clr-border); border-radius: 3px; }
+
+    /* ──────────────────────────────────────────────────────────────
+       5. WELCOME SCREEN
+    ────────────────────────────────────────────────────────────── */
+    .welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 70vh;
+      text-align: center;
+      gap: 16px;
+      animation: fadeIn .5s ease;
+    }
+
+    .welcome__arabic {
+      font-family: var(--font-arabic);
+      font-size: 3.5rem;
+      color: var(--clr-accent);
+      line-height: 1.4;
+      direction: rtl;
+    }
+
+    .welcome__title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--clr-text);
+    }
+
+    .welcome__sub {
+      font-size: 1rem;
+      color: var(--clr-text-muted);
+      max-width: 380px;
+      line-height: 1.6;
+    }
+
+    .welcome__hint {
+      margin-top: 12px;
+      padding: 10px 20px;
+      background: var(--clr-accent-soft);
+      border-radius: var(--radius-md);
+      font-size: .85rem;
+      color: var(--clr-text-muted);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       6. SURAH HEADER
+    ────────────────────────────────────────────────────────────── */
+    .surah-header {
+      text-align: center;
+      margin-bottom: 32px;
+      animation: fadeIn .4s ease;
+    }
+
+    .surah-header__badge {
+      display: inline-block;
+      background: var(--clr-accent);
+      color: #fff;
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+
+    .surah-header__name-ar {
+      font-family: var(--font-arabic);
+      font-size: 2.8rem;
+      color: var(--clr-text);
+      direction: rtl;
+      line-height: 1.5;
+    }
+
+    .surah-header__name-en {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--clr-text);
+      margin-top: 4px;
+    }
+
+    .surah-header__meta {
+      font-size: .85rem;
+      color: var(--clr-text-muted);
+      margin-top: 6px;
+    }
+
+    /* Bismillah ornament */
+    .surah-header__bismillah {
+      font-family: var(--font-arabic);
+      font-size: 2rem;
+      color: var(--clr-accent);
+      margin-top: 20px;
+      direction: rtl;
+    }
+
+    /* Audio player row */
+    .surah-header__audio {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn-play-surah {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--clr-accent);
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      padding: 10px 22px;
+      font-family: var(--font-ui);
+      font-size: .88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity var(--transition), transform var(--transition);
+      box-shadow: 0 4px 12px rgba(201,168,76,.35);
+    }
+    .btn-play-surah:hover  { opacity: .88; transform: translateY(-1px); }
+    .btn-play-surah:active { transform: translateY(0); }
+
+    /* Native audio element (shown when playing) */
+    .surah-audio-player {
+      display: none;
+      width: 100%;
+      max-width: 480px;
+      margin-top: 10px;
+      border-radius: var(--radius-sm);
+      accent-color: var(--clr-accent);
+    }
+    .surah-audio-player.visible { display: block; }
+
+    /* Divider */
+    .surah-divider {
+      border: none;
+      border-top: 1px solid var(--clr-border);
+      margin: 8px 0 28px;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       7. VERSE CARDS
+    ────────────────────────────────────────────────────────────── */
+    .verse-list { display: flex; flex-direction: column; gap: 20px; }
+
+    .verse-card {
+      background: var(--clr-verse-bg);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-md);
+      padding: 22px 26px;
+      transition: background var(--transition), box-shadow var(--transition);
+      animation: slideUp .35s ease both;
+    }
+    .verse-card:hover { background: var(--clr-verse-hover); box-shadow: var(--shadow-sm); }
+
+    /* Stagger the card animations */
+    .verse-card:nth-child(1)  { animation-delay: .00s; }
+    .verse-card:nth-child(2)  { animation-delay: .04s; }
+    .verse-card:nth-child(3)  { animation-delay: .08s; }
+    .verse-card:nth-child(4)  { animation-delay: .12s; }
+    .verse-card:nth-child(5)  { animation-delay: .16s; }
+    .verse-card:nth-child(n+6){ animation-delay: .20s; }
+
+    .verse-card__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .verse-card__num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--clr-accent-soft);
+      border: 1px solid var(--clr-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--clr-accent);
+      flex-shrink: 0;
+    }
+
+    /* Per-verse play button */
+    .btn-play-verse {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: 1px solid var(--clr-border);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-family: var(--font-ui);
+      font-size: .75rem;
+      color: var(--clr-text-muted);
+      cursor: pointer;
+      transition: border-color var(--transition), color var(--transition), background var(--transition);
+    }
+    .btn-play-verse:hover {
+      border-color: var(--clr-accent);
+      color: var(--clr-accent);
+      background: var(--clr-accent-soft);
+    }
+
+    /* Arabic text */
+    .verse-card__arabic {
+      font-family: var(--font-arabic);
+      font-size: 1.95rem;
+      line-height: 2.2;
+      direction: rtl;
+      text-align: right;
+      color: var(--clr-text);
+      margin-bottom: 16px;
+      word-spacing: 4px;
+    }
+
+    /* English translation */
+    .verse-card__translation {
+      font-size: .92rem;
+      line-height: 1.8;
+      color: var(--clr-text-muted);
+      border-top: 1px solid var(--clr-border);
+      padding-top: 12px;
+    }
+
+    .verse-card__translation strong {
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--clr-accent);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       8. LOADING SPINNER
+    ────────────────────────────────────────────────────────────── */
+    .spinner-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      min-height: 50vh;
+      animation: fadeIn .3s ease;
+    }
+
+    .spinner {
+      width: 52px;
+      height: 52px;
+      border: 4px solid var(--clr-border);
+      border-top-color: var(--clr-accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    .spinner-label {
+      font-size: .9rem;
+      color: var(--clr-text-muted);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       9. ERROR MESSAGE
+    ────────────────────────────────────────────────────────────── */
+    .error-box {
+      background: var(--clr-error-bg);
+      border: 1px solid var(--clr-error-border);
+      border-radius: var(--radius-md);
+      padding: 24px 28px;
+      color: var(--clr-error-text);
+      max-width: 560px;
+      margin: 48px auto;
+      animation: fadeIn .4s ease;
+    }
+
+    .error-box__icon  { font-size: 2rem; margin-bottom: 8px; }
+    .error-box__title { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
+    .error-box__msg   { font-size: .9rem; line-height: 1.6; }
+
+    .error-box__retry {
+      margin-top: 16px;
+      background: var(--clr-error-text);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 8px 20px;
+      font-family: var(--font-ui);
+      font-size: .85rem;
+      cursor: pointer;
+      transition: opacity var(--transition);
+    }
+    .error-box__retry:hover { opacity: .85; }
+
+    /* ──────────────────────────────────────────────────────────────
+       10. SIDEBAR OVERLAY (mobile)
+    ────────────────────────────────────────────────────────────── */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 200;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+    .sidebar-overlay.active { display: block; }
+
+    /* ──────────────────────────────────────────────────────────────
+       11. KEYFRAMES
+    ────────────────────────────────────────────────────────────── */
+    @keyframes spin    { to { transform: rotate(360deg); } }
+    @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       12. RESPONSIVE — MOBILE  (≤ 700 px)
+    ────────────────────────────────────────────────────────────── */
+    @media (max-width: 700px) {
+      .topbar__burger { display: flex; }
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100dvh;
+        z-index: 300;
+        transform: translateX(-100%);
+        /* keep width but hide off-screen */
+        transition: transform .3s ease;
+      }
+
+      .sidebar.open { transform: translateX(0); }
+
+      .content {
+        padding: 20px 18px;
+      }
+
+      .surah-header__name-ar { font-size: 2rem; }
+      .verse-card__arabic    { font-size: 1.6rem; }
+      .verse-card            { padding: 16px 18px; }
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       13. SCROLLBAR for Webkit (content area)
+    ────────────────────────────────────────────────────────────── */
+    .content::-webkit-scrollbar       { width: 6px; }
+    .content::-webkit-scrollbar-track { background: transparent; }
+    .content::-webkit-scrollbar-thumb { background: var(--clr-border); border-radius: 4px; }
+  </style>
+</head>
+
+<body>
+  <!-- ═══════════════════════════════════════════════════════════════
+       TOP NAV BAR
+  ════════════════════════════════════════════════════════════════ -->
+  <header class="topbar">
+    <!-- Hamburger — visible on mobile -->
+    <button class="topbar__burger" id="burgerBtn" aria-label="Open Surah list" aria-expanded="false">
+      &#9776;
+    </button>
+
+    <div class="topbar__logo">
+      Al&#8209;Quran <span>Digital Mushaf</span>
+    </div>
+
+    <div class="topbar__spacer"></div>
+
+    <!-- Dark-mode toggle -->
+    <button class="dark-toggle" id="darkToggle" aria-label="Toggle dark mode">
+      <span class="dark-toggle__icon" id="darkIcon">🌙</span>
+      <span id="darkLabel">Dark Mode</span>
+    </button>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       LAYOUT CONTAINER
+  ════════════════════════════════════════════════════════════════ -->
+  <div class="layout">
+
+    <!-- ── Sidebar overlay (mobile tap-to-close) ── -->
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+    <!-- ── Sidebar ── -->
+    <nav class="sidebar" id="sidebar" aria-label="Surah list">
+      <div class="sidebar__search-wrap">
+        <input
+          class="sidebar__search"
+          id="searchInput"
+          type="search"
+          placeholder="Search Surah…"
+          aria-label="Search surahs"
+          autocomplete="off"
+        />
+      </div>
+      <div class="sidebar__label">114 Surahs</div>
+      <ul class="sidebar__list" id="surahList" role="listbox" aria-label="Surah list"></ul>
+    </nav>
+
+    <!-- ── Main content panel ── -->
+    <main class="content" id="mainContent" aria-live="polite" aria-label="Surah content">
+      <!-- Welcome screen (default) -->
+      <div class="welcome" id="welcomeScreen">
+        <div class="welcome__arabic">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+        <div class="welcome__title">Welcome to Al-Quran Digital Mushaf</div>
+        <div class="welcome__sub">
+          A peaceful space to read, listen, and reflect on the Holy Quran with Arabic text and English translation.
+        </div>
+        <div class="welcome__hint">← Select a Surah from the list to begin reading</div>
+      </div>
+    </main>
+
+  </div><!-- /.layout -->
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       JAVASCRIPT  ── all logic lives here
+  ════════════════════════════════════════════════════════════════ -->
+  <script>
+  (() => {
+    'use strict';
+
+    /* ──────────────────────────────────────────────────────────────
+       CONSTANTS & ELEMENT REFERENCES
+    ────────────────────────────────────────────────────────────── */
+    const API_BASE      = 'https://api.alquran.cloud/v1';
+    const AUDIO_BASE    = 'https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/'; // mp3 per surah
+
+    const $html         = document.documentElement;
+    const $surahList    = document.getElementById('surahList');
+    const $searchInput  = document.getElementById('searchInput');
+    const $mainContent  = document.getElementById('mainContent');
+    const $darkToggle   = document.getElementById('darkToggle');
+    const $darkIcon     = document.getElementById('darkIcon');
+    const $darkLabel    = document.getElementById('darkLabel');
+    const $burgerBtn    = document.getElementById('burgerBtn');
+    const $sidebar      = document.getElementById('sidebar');
+    const $overlay      = document.getElementById('sidebarOverlay');
+
+    // App state
+    let allSurahs        = [];          // metadata list from API
+    let currentSurahNum  = null;        // currently displayed surah number
+    let currentAudio     = null;        // the <audio> element for verse playback
+    let isDarkMode       = false;
+
+    /* ──────────────────────────────────────────────────────────────
+       DARK MODE
+    ────────────────────────────────────────────────────────────── */
+    function applyDarkMode(dark) {
+      isDarkMode = dark;
+      $html.classList.toggle('dark', dark);
+      $darkIcon.textContent  = dark ? '☀️' : '🌙';
+      $darkLabel.textContent = dark ? 'Light Mode' : 'Dark Mode';
+      // Persist preference
+      localStorage.setItem('quran-dark', dark ? '1' : '0');
+    }
+
+    // Restore saved preference on load
+    const savedDark = localStorage.getItem('quran-dark');
+    applyDarkMode(savedDark === '1');
+
+    $darkToggle.addEventListener('click', () => applyDarkMode(!isDarkMode));
+
+    /* ──────────────────────────────────────────────────────────────
+       SIDEBAR / MOBILE HAMBURGER
+    ────────────────────────────────────────────────────────────── */
+    function openSidebar() {
+      $sidebar.classList.add('open');
+      $overlay.classList.add('active');
+      $burgerBtn.setAttribute('aria-expanded', 'true');
+    }
+    function closeSidebar() {
+      $sidebar.classList.remove('open');
+      $overlay.classList.remove('active');
+      $burgerBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    $burgerBtn.addEventListener('click', () => {
+      $sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+    });
+    $overlay.addEventListener('click', closeSidebar);
+
+    /* ──────────────────────────────────────────────────────────────
+       HELPER — build HTML safely (avoids innerHTML injection risks)
+    ────────────────────────────────────────────────────────────── */
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       LOADING / ERROR UI HELPERS
+    ────────────────────────────────────────────────────────────── */
+    /**
+     * Display a spinning loader in the main content area.
+     * @param {string} [label] - optional text beneath the spinner
+     */
+    function showSpinner(label = 'Loading…') {
+      $mainContent.innerHTML = `
+        <div class="spinner-wrap" role="status" aria-label="${esc(label)}">
+          <div class="spinner" aria-hidden="true"></div>
+          <p class="spinner-label">${esc(label)}</p>
+        </div>`;
+    }
+
+    /**
+     * Display a friendly error card in the main content area.
+     * @param {string} message - human-readable error detail
+     * @param {Function} [retryFn] - called when user clicks "Retry"
+     */
+    function showError(message, retryFn) {
+      $mainContent.innerHTML = `
+        <div class="error-box" role="alert">
+          <div class="error-box__icon">⚠️</div>
+          <div class="error-box__title">Something went wrong</div>
+          <p class="error-box__msg">${esc(message)}</p>
+          ${retryFn ? '<button class="error-box__retry" id="retryBtn">Try Again</button>' : ''}
+        </div>`;
+
+      if (retryFn) {
+        document.getElementById('retryBtn').addEventListener('click', retryFn);
+      }
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       FETCH  — central helper with try/catch & timeout
+    ────────────────────────────────────────────────────────────── */
+    /**
+     * Fetch JSON from the Alquran.cloud API.
+     * Throws a descriptive Error on network failure or non-200 status.
+     * @param {string} endpoint - path appended to API_BASE
+     * @returns {Promise<object>} parsed JSON data
+     */
+    async function apiFetch(endpoint) {
+      const controller = new AbortController();
+      const timeoutId  = setTimeout(() => controller.abort(), 15000); // 15 s timeout
+
+      try {
+        const res = await fetch(`${API_BASE}${endpoint}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+          throw new Error(`Server responded with HTTP ${res.status} ${res.statusText}`);
+        }
+
+        const json = await res.json();
+
+        if (json.code !== 200 && json.status !== 'OK') {
+          throw new Error(json.status || 'API returned an unexpected response.');
+        }
+
+        return json.data;
+      } catch (err) {
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') {
+          throw new Error('Request timed out. Please check your internet connection and try again.');
+        }
+        throw err; // re-throw for caller to handle
+      }
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       LOAD SURAH LIST (sidebar)
+    ────────────────────────────────────────────────────────────── */
+    async function loadSurahList() {
+      // Show a subtle placeholder while the sidebar data loads
+      $surahList.innerHTML = `
+        <li style="padding:20px 16px; color: var(--clr-sidebar-muted); font-size:.85rem;">
+          Loading surahs…
+        </li>`;
+
+      try {
+        allSurahs = await apiFetch('/surah');
+        renderSurahList(allSurahs);
+      } catch (err) {
+        $surahList.innerHTML = `
+          <li style="padding:16px; color:var(--clr-error-text); font-size:.82rem; line-height:1.5">
+            ⚠️ Failed to load surah list.<br>
+            <button onclick="loadSurahList()" style="margin-top:8px;background:none;border:1px solid currentColor;color:inherit;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:.8rem;">Retry</button>
+          </li>`;
+        console.error('[QuranApp] Surah list error:', err);
+      }
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       RENDER SURAH LIST ITEMS
+    ────────────────────────────────────────────────────────────── */
+    /**
+     * Render (or re-render) the sidebar list.
+     * @param {Array} surahs - array of surah metadata objects
+     */
+    function renderSurahList(surahs) {
+      if (surahs.length === 0) {
+        $surahList.innerHTML = `
+          <li style="padding:16px; color:var(--clr-sidebar-muted); font-size:.85rem; text-align:center;">
+            No surahs found.
+          </li>`;
+        return;
+      }
+
+      // Build list HTML in one pass for performance
+      const html = surahs.map(s => `
+        <li
+          class="sidebar__item${s.number === currentSurahNum ? ' active' : ''}"
+          role="option"
+          aria-selected="${s.number === currentSurahNum}"
+          data-num="${s.number}"
+          tabindex="0"
+        >
+          <div class="sidebar__num">${s.number}</div>
+          <div class="sidebar__info">
+            <div class="sidebar__name-en">${esc(s.englishName)}</div>
+            <div class="sidebar__meta">${esc(s.englishNameTranslation)} · ${esc(s.revelationType)} · ${s.numberOfAyahs} verses</div>
+          </div>
+          <div class="sidebar__name-ar">${esc(s.name)}</div>
+        </li>
+      `).join('');
+
+      $surahList.innerHTML = html;
+
+      // Attach click/keyboard listeners
+      $surahList.querySelectorAll('.sidebar__item').forEach(item => {
+        const handler = () => {
+          const num = parseInt(item.dataset.num, 10);
+          loadSurah(num);
+          closeSidebar();
+        };
+        item.addEventListener('click', handler);
+        item.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
+        });
+      });
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       SEARCH — filter surah list in real time
+    ────────────────────────────────────────────────────────────── */
+    $searchInput.addEventListener('input', () => {
+      const q = $searchInput.value.trim().toLowerCase();
+      if (!q) {
+        renderSurahList(allSurahs);
+        return;
+      }
+      const filtered = allSurahs.filter(s =>
+        s.englishName.toLowerCase().includes(q) ||
+        s.englishNameTranslation.toLowerCase().includes(q) ||
+        s.name.includes(q) ||                          // Arabic name
+        String(s.number).startsWith(q)
+      );
+      renderSurahList(filtered);
+    });
+
+    /* ──────────────────────────────────────────────────────────────
+       LOAD A SURAH — fetches Arabic + English translation in parallel
+    ────────────────────────────────────────────────────────────── */
+    /**
+     * Fetch and display a surah by its number (1–114).
+     * Fetches both the Arabic edition and English Saheeh International
+     * translation in parallel for speed.
+     * @param {number} surahNum
+     */
+    async function loadSurah(surahNum) {
+      currentSurahNum = surahNum;
+
+      // Highlight the active sidebar item
+      $surahList.querySelectorAll('.sidebar__item').forEach(item => {
+        const active = parseInt(item.dataset.num, 10) === surahNum;
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-selected', active);
+      });
+
+      // Scroll active item into view in sidebar
+      const activeItem = $surahList.querySelector('.sidebar__item.active');
+      if (activeItem) {
+        activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+
+      // Show spinner in content area
+      showSpinner('Loading Surah…');
+
+      // Stop any playing audio
+      stopAudio();
+
+      try {
+        // Fetch Arabic text and English translation in parallel
+        const [arabicData, translationData] = await Promise.all([
+          apiFetch(`/surah/${surahNum}`),
+          apiFetch(`/surah/${surahNum}/en.sahih`)
+        ]);
+
+        renderSurah(arabicData, translationData);
+      } catch (err) {
+        showError(
+          `Could not load Surah #${surahNum}. ${err.message}`,
+          () => loadSurah(surahNum)  // retry callback
+        );
+        console.error('[QuranApp] Surah load error:', err);
+      }
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       RENDER SURAH CONTENT
+    ────────────────────────────────────────────────────────────── */
+    /**
+     * Build and inject the surah header + verse cards into the content area.
+     * @param {object} arabicData      - data.surah from Arabic API response
+     * @param {object} translationData - data.surah from English API response
+     */
+    function renderSurah(arabicData, translationData) {
+      const surahMeta    = arabicData;
+      const ayahs        = arabicData.ayahs;
+      const translations = translationData.ayahs;
+
+      // Surah number for audio URL
+      const num = surahMeta.number;
+
+      // Build Bismillah (shown for all except Surah 9 — Al-Tawbah)
+      const bismillah = num !== 9 ? `
+        <div class="surah-header__bismillah" lang="ar">
+          بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
+        </div>` : '';
+
+      // Build verse cards HTML
+      const versesHTML = ayahs.map((ayah, idx) => {
+        const translation = translations[idx];
+        return `
+          <article class="verse-card" id="verse-${ayah.numberInSurah}">
+            <div class="verse-card__top">
+              <div class="verse-card__num" title="Verse ${ayah.numberInSurah}">
+                ${ayah.numberInSurah}
+              </div>
+              <button
+                class="btn-play-verse"
+                data-ayah="${ayah.number}"
+                data-surah="${num}"
+                data-verse="${ayah.numberInSurah}"
+                aria-label="Play verse ${ayah.numberInSurah}"
+              >
+                ▶ Play Verse
+              </button>
+            </div>
+
+            <!-- Arabic text — RTL, Amiri font -->
+            <p class="verse-card__arabic" lang="ar" dir="rtl">
+              ${esc(ayah.text)}
+            </p>
+
+            <!-- English translation -->
+            <div class="verse-card__translation">
+              <strong>Translation</strong>
+              ${esc(translation ? translation.text : '')}
+            </div>
+          </article>`;
+      }).join('');
+
+      // Inject everything
+      $mainContent.innerHTML = `
+        <!-- Surah Header -->
+        <div class="surah-header">
+          <div class="surah-header__badge">Surah ${num}</div>
+          <div class="surah-header__name-ar" lang="ar" dir="rtl">
+            ${esc(surahMeta.name)}
+          </div>
+          <div class="surah-header__name-en">${esc(surahMeta.englishName)}</div>
+          <div class="surah-header__meta">
+            ${esc(surahMeta.englishNameTranslation)} · ${esc(surahMeta.revelationType)} · ${surahMeta.numberOfAyahs} Verses
+          </div>
+
+          ${bismillah}
+
+          <!-- Surah-level audio controls -->
+          <div class="surah-header__audio">
+            <button class="btn-play-surah" id="playSurahBtn" aria-label="Play full recitation of Surah ${esc(surahMeta.englishName)}">
+              ▶ Play Full Recitation
+            </button>
+          </div>
+
+          <!-- Native HTML5 audio element (hidden until user presses play) -->
+          <audio
+            class="surah-audio-player"
+            id="surahAudioPlayer"
+            controls
+            preload="none"
+            aria-label="Recitation of ${esc(surahMeta.englishName)}"
+          ></audio>
+        </div>
+
+        <hr class="surah-divider" />
+
+        <!-- Verse Cards -->
+        <div class="verse-list" id="verseList">
+          ${versesHTML}
+        </div>`;
+
+      // Scroll content to top
+      $mainContent.scrollTo({ top: 0, behavior: 'instant' });
+
+      // Wire up full-surah play button
+      const $playSurahBtn    = document.getElementById('playSurahBtn');
+      const $surahAudio      = document.getElementById('surahAudioPlayer');
+      const surahAudioUrl    = `${AUDIO_BASE}${num}.mp3`;
+
+      $playSurahBtn.addEventListener('click', () => {
+        if ($surahAudio.src !== surahAudioUrl) {
+          $surahAudio.src = surahAudioUrl;
+        }
+        $surahAudio.classList.add('visible');
+        $surahAudio.play().catch(err => {
+          console.warn('[QuranApp] Audio play prevented:', err.message);
+        });
+        $playSurahBtn.textContent = '🔊 Playing…';
+      });
+
+      $surahAudio.addEventListener('pause', () => { $playSurahBtn.textContent = '▶ Play Full Recitation'; });
+      $surahAudio.addEventListener('ended', () => { $playSurahBtn.textContent = '▶ Play Full Recitation'; });
+
+      // Wire up per-verse play buttons
+      document.querySelectorAll('.btn-play-verse').forEach($btn => {
+        $btn.addEventListener('click', () => playVerse($btn));
+      });
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       PER-VERSE AUDIO PLAYBACK
+       Uses the Islamic.network CDN which provides individual ayah MP3s
+       in the format: /quran/audio/128/ar.alafasy/{globalAyahNumber}.mp3
+    ────────────────────────────────────────────────────────────── */
+    const VERSE_AUDIO_BASE = 'https://cdn.islamic.network/quran/audio/128/ar.alafasy/';
+
+    /**
+     * Stop any currently playing audio.
+     */
+    function stopAudio() {
+      if (currentAudio && !currentAudio.paused) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+      // Reset all verse button labels
+      document.querySelectorAll('.btn-play-verse').forEach(b => {
+        b.textContent = '▶ Play Verse';
+      });
+    }
+
+    /**
+     * Play the recitation for a single verse.
+     * @param {HTMLButtonElement} $btn - the clicked play button
+     */
+    function playVerse($btn) {
+      const ayahNum = parseInt($btn.dataset.ayah, 10);  // global Quran ayah number
+      const verseNum = $btn.dataset.verse;
+
+      // If same verse is playing, toggle pause/resume
+      if (currentAudio && currentAudio.dataset.ayah === String(ayahNum)) {
+        if (currentAudio.paused) {
+          currentAudio.play();
+          $btn.textContent = '⏸ Playing…';
+        } else {
+          currentAudio.pause();
+          $btn.textContent = '▶ Play Verse';
+        }
+        return;
+      }
+
+      // Stop previous audio
+      stopAudio();
+
+      const url = `${VERSE_AUDIO_BASE}${ayahNum}.mp3`;
+      currentAudio = new Audio(url);
+      currentAudio.dataset.ayah = String(ayahNum);
+
+      $btn.textContent = '⏳ Loading…';
+
+      currentAudio.addEventListener('canplay', () => {
+        currentAudio.play();
+        $btn.textContent = '⏸ Playing…';
+      }, { once: true });
+
+      currentAudio.addEventListener('ended', () => {
+        $btn.textContent = '▶ Play Verse';
+        currentAudio = null;
+      }, { once: true });
+
+      currentAudio.addEventListener('error', () => {
+        $btn.textContent = '▶ Play Verse';
+        console.warn('[QuranApp] Verse audio failed for ayah', ayahNum);
+        // Graceful fallback: try surah-level audio instead
+        const $surahAudio = document.getElementById('surahAudioPlayer');
+        if ($surahAudio) {
+          $surahAudio.classList.add('visible');
+          $surahAudio.play().catch(() => {});
+        }
+      }, { once: true });
+
+      currentAudio.load();
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       INITIALISE  — kick everything off on DOMContentLoaded
+    ────────────────────────────────────────────────────────────── */
+    loadSurahList();
+
+  })(); // end IIFE
+  </script>
+</body>
+</html>
