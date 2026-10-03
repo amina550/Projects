@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do List Manager</title>
+
+    <!-- Google Fonts: Inter for clean, modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+
+    <!-- ============================================================
+         APP WRAPPER — centres the card on screen
+    ============================================================ -->
+    <div class="app-wrapper">
+
+      <!-- ── Card ─────────────────────────────────────────────── -->
+      <div class="card" role="main">
+
+        <!-- Card header -->
+        <header class="card__header">
+          <h1 class="card__title">
+            <!-- Clipboard icon (inline SVG, no external dependency) -->
+            <svg class="card__icon" xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+            </svg>
+            My Tasks
+          </h1>
+
+          <!-- Live task counter badge -->
+          <span class="card__counter" id="taskCounter" aria-live="polite" aria-atomic="true">
+            0 tasks
+          </span>
+        </header>
+
+        <!-- ── Input area ────────────────────────────────────── -->
+        <div class="input-area">
+          <div class="input-wrapper">
+            <input
+              type="text"
+              id="taskInput"
+              class="input-area__field"
+              placeholder="Add a new task…"
+              maxlength="200"
+              autocomplete="off"
+              aria-label="New task text"
+            />
+            <!-- Error message (hidden by default) -->
+            <span class="input-area__error" id="inputError" role="alert" aria-live="assertive">
+              Please enter a task first.
+            </span>
+          </div>
+
+          <button class="btn btn--add" id="addBtn" aria-label="Add task">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5"  y1="12" x2="19" y2="12"/>
+            </svg>
+            Add
+          </button>
+        </div>
+
+        <!-- ── Filter tabs ────────────────────────────────────── -->
+        <div class="filters" role="tablist" aria-label="Filter tasks">
+          <button class="filters__btn filters__btn--active" data-filter="all"   role="tab" aria-selected="true">All</button>
+          <button class="filters__btn"                      data-filter="active" role="tab" aria-selected="false">Active</button>
+          <button class="filters__btn"                      data-filter="done"   role="tab" aria-selected="false">Done</button>
+        </div>
+
+        <!-- ── Task list ──────────────────────────────────────── -->
+        <ul class="task-list" id="taskList" aria-label="Task list" aria-live="polite">
+          <!-- Tasks are injected here by JavaScript -->
+        </ul>
+
+        <!-- Empty-state illustration (shown when list is empty) -->
+        <div class="empty-state" id="emptyState" hidden>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p>Nothing here yet — add your first task!</p>
+        </div>
+
+        <!-- ── Footer: bulk actions ───────────────────────────── -->
+        <footer class="card__footer" id="cardFooter" hidden>
+          <span class="card__footer-info" id="footerInfo"></span>
+          <button class="btn btn--ghost btn--small" id="clearDoneBtn">
+            Clear completed
+          </button>
+        </footer>
+
+      </div><!-- /.card -->
+    </div><!-- /.app-wrapper -->
+
+    <!-- Main JavaScript (deferred so DOM is ready) -->
+    <script src="app.js" defer></script>
+  </body>
+</html>

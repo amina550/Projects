@@ -1,0 +1,643 @@
+/* ================================================================
+   STYLE.CSS  —  To-Do List Manager
+   ================================================================
+   Table of Contents
+   -----------------
+   1.  Design Tokens (CSS custom properties)
+   2.  Reset & Base
+   3.  App Wrapper / Background
+   4.  Card
+   5.  Card Header
+   6.  Input Area
+   7.  Filter Tabs
+   8.  Task List & Task Items
+   9.  Animations & Transitions
+   10. Empty State
+   11. Card Footer
+   12. Utility Buttons
+   13. Scrollbar
+   14. Responsive (≤ 480 px)
+================================================================ */
+
+
+/* ----------------------------------------------------------------
+   1. Design Tokens
+---------------------------------------------------------------- */
+:root {
+  /* Palette */
+  --clr-bg:            #f0f4ff;
+  --clr-card:          #ffffff;
+  --clr-primary:       #6366f1;      /* Indigo-500 */
+  --clr-primary-dark:  #4f46e5;      /* Indigo-600 */
+  --clr-primary-light: #e0e7ff;      /* Indigo-100 */
+  --clr-danger:        #ef4444;      /* Red-500 */
+  --clr-danger-light:  #fee2e2;      /* Red-100 */
+  --clr-success:       #22c55e;      /* Green-500 */
+  --clr-text:          #1e293b;      /* Slate-800 */
+  --clr-text-muted:    #94a3b8;      /* Slate-400 */
+  --clr-border:        #e2e8f0;      /* Slate-200 */
+
+  /* Typography */
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-size-sm:  0.8125rem;   /* 13 px */
+  --font-size-base:  1rem;      /* 16 px */
+  --font-size-lg:  1.25rem;     /* 20 px */
+  --font-size-xl:  1.5rem;      /* 24 px */
+
+  /* Spacing */
+  --space-xs:  0.25rem;
+  --space-sm:  0.5rem;
+  --space-md:  1rem;
+  --space-lg:  1.5rem;
+  --space-xl:  2rem;
+
+  /* Borders & Shadows */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.07),
+                 0 2px 4px -2px rgb(0 0 0 / 0.07);
+  --shadow-card-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+                       0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* Transitions */
+  --transition-fast:   150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow:   400ms ease;
+}
+
+
+/* ----------------------------------------------------------------
+   2. Reset & Base
+---------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: var(--clr-text);
+  background-color: var(--clr-bg);
+  min-height: 100dvh;           /* dynamic viewport height */
+  line-height: 1.6;
+}
+
+ul {
+  list-style: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  background: none;
+}
+
+input {
+  font-family: inherit;
+}
+
+
+/* ----------------------------------------------------------------
+   3. App Wrapper / Background
+---------------------------------------------------------------- */
+.app-wrapper {
+  /* Subtle dot-grid background pattern */
+  background-image: radial-gradient(circle, var(--clr-border) 1px, transparent 1px);
+  background-size: 24px 24px;
+  min-height: 100dvh;
+  display: flex;
+  align-items: flex-start;       /* card sits near the top */
+  justify-content: center;
+  padding: var(--space-xl) var(--space-md);
+}
+
+
+/* ----------------------------------------------------------------
+   4. Card
+---------------------------------------------------------------- */
+.card {
+  background: var(--clr-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  width: 100%;
+  max-width: 560px;
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  transition: box-shadow var(--transition-normal);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+
+/* ----------------------------------------------------------------
+   5. Card Header
+---------------------------------------------------------------- */
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.card__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--clr-text);
+}
+
+.card__icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--clr-primary);
+  flex-shrink: 0;
+}
+
+.card__counter {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--clr-primary);
+  background: var(--clr-primary-light);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: transform var(--transition-fast);
+}
+
+/* Quick "pop" when counter updates */
+.card__counter.pop {
+  transform: scale(1.15);
+}
+
+
+/* ----------------------------------------------------------------
+   6. Input Area
+---------------------------------------------------------------- */
+.input-area {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+}
+
+.input-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.input-area__field {
+  width: 100%;
+  padding: 0.65rem var(--space-md);
+  border: 2px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  color: var(--clr-text);
+  background: #f8fafc;
+  outline: none;
+  transition: border-color var(--transition-fast),
+              background var(--transition-fast),
+              box-shadow var(--transition-fast);
+}
+
+.input-area__field:focus {
+  border-color: var(--clr-primary);
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--clr-primary-light);
+}
+
+/* Error state — applied via JS */
+.input-area__field.is-error {
+  border-color: var(--clr-danger);
+  background: var(--clr-danger-light);
+  box-shadow: 0 0 0 3px #fecaca;
+  animation: shake 0.35s ease;
+}
+
+.input-area__error {
+  font-size: var(--font-size-sm);
+  color: var(--clr-danger);
+  font-weight: 500;
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  transition: opacity var(--transition-fast), height var(--transition-fast);
+}
+
+/* Visible error text — toggled via JS */
+.input-area__error.is-visible {
+  opacity: 1;
+  height: 1.25rem;
+}
+
+/* Add button */
+.btn--add {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0.65rem var(--space-md);
+  background: var(--clr-primary);
+  color: #fff;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast),
+              transform  var(--transition-fast),
+              box-shadow var(--transition-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn--add svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.btn--add:hover {
+  background: var(--clr-primary-dark);
+  box-shadow: 0 4px 12px rgb(99 102 241 / 0.4);
+}
+
+.btn--add:active {
+  transform: scale(0.96);
+}
+
+
+/* ----------------------------------------------------------------
+   7. Filter Tabs
+---------------------------------------------------------------- */
+.filters {
+  display: flex;
+  gap: var(--space-xs);
+  border-bottom: 2px solid var(--clr-border);
+  padding-bottom: var(--space-sm);
+}
+
+.filters__btn {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--clr-text-muted);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast),
+              background var(--transition-fast);
+}
+
+.filters__btn:hover {
+  color: var(--clr-primary);
+  background: var(--clr-primary-light);
+}
+
+.filters__btn--active {
+  color: var(--clr-primary);
+  background: var(--clr-primary-light);
+}
+
+
+/* ----------------------------------------------------------------
+   8. Task List & Task Items
+---------------------------------------------------------------- */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  /* Allow list to scroll if it grows very long */
+  max-height: 55vh;
+  overflow-y: auto;
+  padding-right: var(--space-xs);    /* room for scrollbar */
+}
+
+/* ── Individual task item ── */
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0.75rem var(--space-md);
+  background: #f8fafc;
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast),
+              border-color var(--transition-fast),
+              opacity var(--transition-slow),
+              transform var(--transition-slow);
+
+  /* Entry animation starting state */
+  animation: slideIn var(--transition-slow) both;
+}
+
+.task-item:hover {
+  background: #fff;
+  border-color: var(--clr-primary-light);
+}
+
+/* Completed task styling */
+.task-item.is-done {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  opacity: 0.7;
+}
+
+/* Removal animation trigger — added by JS before deletion */
+.task-item.removing {
+  animation: slideOut var(--transition-slow) forwards;
+}
+
+/* ── Custom Checkbox ── */
+.task-item__checkbox {
+  /* Hide native input, but keep it accessible */
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.task-item__checkbox-label {
+  /* The visual checkbox box */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--clr-border);
+  border-radius: 0.375rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: border-color var(--transition-fast),
+              background    var(--transition-fast),
+              box-shadow    var(--transition-fast);
+  position: relative;
+}
+
+.task-item__checkbox:focus-visible + .task-item__checkbox-label {
+  box-shadow: 0 0 0 3px var(--clr-primary-light);
+  border-color: var(--clr-primary);
+}
+
+.task-item__checkbox:checked + .task-item__checkbox-label {
+  background: var(--clr-success);
+  border-color: var(--clr-success);
+}
+
+/* Checkmark tick (drawn with CSS) */
+.task-item__checkbox-label::after {
+  content: '';
+  display: block;
+  width: 0.35rem;
+  height: 0.6rem;
+  border: 2px solid #fff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg) scaleY(0);
+  transform-origin: bottom center;
+  transition: transform var(--transition-fast);
+}
+
+.task-item__checkbox:checked + .task-item__checkbox-label::after {
+  transform: rotate(45deg) scaleY(1);
+}
+
+/* ── Task text ── */
+.task-item__text {
+  flex: 1;
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  word-break: break-word;
+  transition: color var(--transition-fast),
+              text-decoration var(--transition-fast);
+}
+
+.task-item.is-done .task-item__text {
+  color: var(--clr-text-muted);
+  text-decoration: line-through;
+}
+
+/* ── Delete button ── */
+.task-item__delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-sm);
+  color: var(--clr-text-muted);
+  opacity: 0;                      /* hidden by default */
+  flex-shrink: 0;
+  transition: opacity     var(--transition-fast),
+              color       var(--transition-fast),
+              background  var(--transition-fast),
+              transform   var(--transition-fast);
+}
+
+/* Show delete button on item hover / focus-within */
+.task-item:hover .task-item__delete,
+.task-item:focus-within .task-item__delete {
+  opacity: 1;
+}
+
+.task-item__delete:hover {
+  color: var(--clr-danger);
+  background: var(--clr-danger-light);
+  transform: scale(1.1);
+}
+
+.task-item__delete:focus-visible {
+  outline: 2px solid var(--clr-danger);
+  opacity: 1;
+}
+
+.task-item__delete svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+
+/* ----------------------------------------------------------------
+   9. Animations & Transitions
+---------------------------------------------------------------- */
+
+/* Task slide in from above */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Task slide out and shrink on removal */
+@keyframes slideOut {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scaleY(1);
+    max-height: 80px;
+    margin-bottom: 0;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+  50% {
+    opacity: 0;
+    transform: translateX(20px) scaleY(0.8);
+  }
+  100% {
+    opacity: 0;
+    max-height: 0;
+    margin-bottom: calc(-1 * var(--space-sm));
+    padding-top: 0;
+    padding-bottom: 0;
+    transform: translateX(20px) scaleY(0);
+  }
+}
+
+/* Input shake on empty-submit */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-6px); }
+  40%       { transform: translateX(6px); }
+  60%       { transform: translateX(-4px); }
+  80%       { transform: translateX(4px); }
+}
+
+
+/* ----------------------------------------------------------------
+   10. Empty State
+---------------------------------------------------------------- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xl) 0 var(--space-md);
+  color: var(--clr-text-muted);
+  text-align: center;
+}
+
+.empty-state svg {
+  width: 3rem;
+  height: 3rem;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+
+/* ----------------------------------------------------------------
+   11. Card Footer
+---------------------------------------------------------------- */
+.card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  border-top: 1px solid var(--clr-border);
+  padding-top: var(--space-md);
+}
+
+.card__footer-info {
+  font-size: var(--font-size-sm);
+  color: var(--clr-text-muted);
+  font-weight: 500;
+}
+
+
+/* ----------------------------------------------------------------
+   12. Utility Buttons
+---------------------------------------------------------------- */
+.btn--ghost {
+  color: var(--clr-text-muted);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  transition: color var(--transition-fast),
+              background var(--transition-fast);
+}
+
+.btn--ghost:hover {
+  color: var(--clr-danger);
+  background: var(--clr-danger-light);
+}
+
+.btn--small {
+  font-size: var(--font-size-sm);
+}
+
+
+/* ----------------------------------------------------------------
+   13. Scrollbar (Webkit)
+---------------------------------------------------------------- */
+.task-list::-webkit-scrollbar {
+  width: 4px;
+}
+.task-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.task-list::-webkit-scrollbar-thumb {
+  background: var(--clr-border);
+  border-radius: 999px;
+}
+.task-list::-webkit-scrollbar-thumb:hover {
+  background: var(--clr-text-muted);
+}
+
+
+/* ----------------------------------------------------------------
+   14. Responsive — mobile (≤ 480 px)
+---------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .app-wrapper {
+    padding: var(--space-md) var(--space-sm);
+    align-items: flex-start;
+  }
+
+  .card {
+    padding: var(--space-lg) var(--space-md);
+    gap: var(--space-md);
+    border-radius: var(--radius-md);
+  }
+
+  .card__title {
+    font-size: var(--font-size-lg);
+  }
+
+  /* Stack the input and Add button on very small screens */
+  .input-area {
+    flex-direction: column;
+  }
+
+  .btn--add {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Always show delete button on touch devices */
+  .task-item__delete {
+    opacity: 1;
+  }
+
+  .task-list {
+    max-height: 60vh;
+  }
+}

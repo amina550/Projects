@@ -1,0 +1,15 @@
+# Dependencies (none for this vanilla project, but good practice)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor configs
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Vercel local dev cache
+.vercel/
