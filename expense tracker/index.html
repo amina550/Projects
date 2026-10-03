@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expense Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- ============================================================
+       STYLES
+       ============================================================ -->
+  <style>
+    /* ---------- CSS Custom Properties (Design Tokens) ---------- */
+    :root {
+      --clr-bg:          #0f1117;
+      --clr-surface:     #1a1d27;
+      --clr-surface-2:   #22263a;
+      --clr-border:      #2e3250;
+      --clr-text:        #e2e8f0;
+      --clr-muted:       #8892b0;
+      --clr-income:      #10b981;
+      --clr-income-bg:   rgba(16, 185, 129, 0.10);
+      --clr-expense:     #f43f5e;
+      --clr-expense-bg:  rgba(244, 63, 94, 0.10);
+      --clr-accent:      #6366f1;
+      --clr-accent-hover:#4f46e5;
+      --clr-danger:      #f43f5e;
+      --radius-sm:       8px;
+      --radius-md:       14px;
+      --radius-lg:       20px;
+      --shadow-card:     0 4px 24px rgba(0, 0, 0, 0.45);
+      --shadow-btn:      0 2px 12px rgba(99, 102, 241, 0.35);
+      --transition:      0.2s ease;
+      --font:            'Inter', system-ui, sans-serif;
+    }
+
+    /* ---------- Reset & Base ---------- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--clr-bg);
+      color: var(--clr-text);
+      min-height: 100dvh;
+      padding: 2rem 1rem 4rem;
+      line-height: 1.6;
+    }
+
+    /* ---------- Layout Wrapper ---------- */
+    .container {
+      width: 100%;
+      max-width: 540px;
+      margin-inline: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* ---------- App Header ---------- */
+    .app-header {
+      text-align: center;
+    }
+
+    .app-header h1 {
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .app-header p {
+      color: var(--clr-muted);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    /* ---------- Card Shell ---------- */
+    .card {
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 1.5rem;
+    }
+
+    /* ---------- Dashboard / Balance Panel ---------- */
+    .balance-panel {
+      text-align: center;
+      padding-block: 2rem 1.75rem;
+    }
+
+    .balance-panel .label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--clr-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .balance-panel .total-balance {
+      font-size: clamp(2.4rem, 8vw, 3.2rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      color: var(--clr-text);
+      transition: color var(--transition);
+    }
+
+    .balance-panel .total-balance.positive { color: var(--clr-income); }
+    .balance-panel .total-balance.negative { color: var(--clr-expense); }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.875rem;
+      margin-top: 1.5rem;
+    }
+
+    .summary-card {
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .summary-card.income  { background: var(--clr-income-bg);  border: 1px solid rgba(16, 185, 129, 0.25); }
+    .summary-card.expense { background: var(--clr-expense-bg); border: 1px solid rgba(244, 63, 94, 0.25);  }
+
+    .summary-card .icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .summary-card.income  .icon { background: rgba(16, 185, 129, 0.2); }
+    .summary-card.expense .icon { background: rgba(244, 63, 94, 0.2);  }
+
+    .summary-card .info { text-align: left; }
+
+    .summary-card .info .s-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--clr-muted);
+    }
+
+    .summary-card .info .s-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-top: 0.1rem;
+    }
+
+    .summary-card.income  .info .s-value { color: var(--clr-income);  }
+    .summary-card.expense .info .s-value { color: var(--clr-expense); }
+
+    /* ---------- Section Titles ---------- */
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--clr-muted);
+      margin-bottom: 1rem;
+    }
+
+    /* ---------- Add Transaction Form ---------- */
+    .form-card {}
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.375rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--clr-muted);
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      background: var(--clr-surface-2);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-sm);
+      color: var(--clr-text);
+      font-family: var(--font);
+      font-size: 0.9375rem;
+      padding: 0.65rem 0.875rem;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    /* Select arrow icon via background image */
+    .form-group select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238892b0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.875rem center;
+      padding-right: 2.5rem;
+      cursor: pointer;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--clr-accent);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    /* :user-valid / :user-invalid for progressive enhancement */
+    .form-group input:user-invalid,
+    .form-group input:not(:placeholder-shown):invalid {
+      border-color: var(--clr-expense);
+      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.15);
+    }
+
+    /* Type toggle (Income / Expense) */
+    .type-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .type-toggle input[type="radio"] { display: none; }
+
+    .type-toggle label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.6rem 0.5rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--clr-border);
+      background: var(--clr-surface-2);
+      color: var(--clr-muted);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--transition), border-color var(--transition), color var(--transition);
+      user-select: none;
+    }
+
+    .type-toggle input[type="radio"]#type-income:checked + label {
+      background: var(--clr-income-bg);
+      border-color: var(--clr-income);
+      color: var(--clr-income);
+    }
+
+    .type-toggle input[type="radio"]#type-expense:checked + label {
+      background: var(--clr-expense-bg);
+      border-color: var(--clr-expense);
+      color: var(--clr-expense);
+    }
+
+    /* Validation error message */
+    .error-msg {
+      font-size: 0.75rem;
+      color: var(--clr-expense);
+      min-height: 1rem;
+      margin-top: -0.5rem;
+      margin-bottom: 0.25rem;
+      display: none;
+    }
+
+    .error-msg.visible { display: block; }
+
+    /* Submit button */
+    .btn-add {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--clr-accent);
+      color: #fff;
+      font-family: var(--font);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      box-shadow: var(--shadow-btn);
+      transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+      margin-top: 0.5rem;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-add:hover  { background: var(--clr-accent-hover); box-shadow: 0 4px 18px rgba(99, 102, 241, 0.5); }
+    .btn-add:active { transform: scale(0.98); }
+
+    /* ---------- Transaction History ---------- */
+    .history-card {}
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--clr-muted);
+      font-size: 0.875rem;
+      display: none;
+    }
+
+    .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .empty-state p { line-height: 1.5; }
+
+    .empty-state.visible { display: block; }
+
+    /* Transaction list */
+    #transaction-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+    }
+
+    /* Each transaction item */
+    .transaction-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      background: var(--clr-surface-2);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-sm);
+      transition: border-color var(--transition), background var(--transition);
+      animation: slide-in 0.25s ease forwards;
+    }
+
+    .transaction-item:hover { border-color: var(--clr-accent); }
+
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Colored left accent bar */
+    .transaction-item::before {
+      content: '';
+      display: block;
+      width: 3px;
+      height: 36px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .transaction-item.income::before  { background: var(--clr-income);  }
+    .transaction-item.expense::before { background: var(--clr-expense); }
+
+    /* Description & date */
+    .tx-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .tx-desc {
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--clr-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tx-date {
+      font-size: 0.725rem;
+      color: var(--clr-muted);
+      margin-top: 0.1rem;
+    }
+
+    /* Amount */
+    .tx-amount {
+      font-size: 1rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .transaction-item.income  .tx-amount { color: var(--clr-income);  }
+    .transaction-item.expense .tx-amount { color: var(--clr-expense); }
+
+    /* Delete button */
+    .btn-delete {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--clr-muted);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      transition: color var(--transition), border-color var(--transition), background var(--transition);
+      font-size: 0.85rem;
+    }
+
+    .btn-delete:hover {
+      color: var(--clr-danger);
+      border-color: rgba(244, 63, 94, 0.4);
+      background: rgba(244, 63, 94, 0.08);
+    }
+
+    /* ---------- Footer ---------- */
+    .app-footer {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--clr-muted);
+      margin-top: 0.5rem;
+    }
+
+    /* ---------- Responsive Tweaks ---------- */
+    @media (max-width: 400px) {
+      body { padding: 1.25rem 0.75rem 3rem; }
+      .card { padding: 1.25rem; }
+      .balance-panel { padding-block: 1.5rem 1.25rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ============================================================
+       HTML STRUCTURE
+       ============================================================ -->
+  <div class="container">
+
+    <!-- App Header -->
+    <header class="app-header">
+      <h1>💸 Expense Tracker</h1>
+      <p>Track your income &amp; expenses in real-time</p>
+    </header>
+
+    <!-- ── Dashboard Card ── -->
+    <section class="card balance-panel" aria-label="Balance summary">
+      <p class="label">Total Balance</p>
+      <p class="total-balance" id="total-balance">$0.00</p>
+
+      <div class="summary-row">
+        <!-- Income Summary -->
+        <div class="summary-card income">
+          <div class="icon" aria-hidden="true">⬆</div>
+          <div class="info">
+            <p class="s-label">Income</p>
+            <p class="s-value" id="total-income">$0.00</p>
+          </div>
+        </div>
+
+        <!-- Expense Summary -->
+        <div class="summary-card expense">
+          <div class="icon" aria-hidden="true">⬇</div>
+          <div class="info">
+            <p class="s-label">Expenses</p>
+            <p class="s-value" id="total-expense">$0.00</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Add Transaction Form Card ── -->
+    <section class="card form-card" aria-label="Add new transaction">
+      <p class="section-title">New Transaction</p>
+
+      <form id="transaction-form" novalidate>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label for="tx-desc">Description</label>
+          <input
+            type="text"
+            id="tx-desc"
+            placeholder="e.g. Groceries, Salary…"
+            autocomplete="off"
+            maxlength="80"
+            required
+          />
+          <span class="error-msg" id="err-desc" role="alert">Please enter a description.</span>
+        </div>
+
+        <!-- Amount -->
+        <div class="form-group">
+          <label for="tx-amount">Amount ($)</label>
+          <input
+            type="number"
+            id="tx-amount"
+            placeholder="0.00"
+            min="0.01"
+            step="0.01"
+            required
+          />
+          <span class="error-msg" id="err-amount" role="alert">Amount must be a number greater than 0.</span>
+        </div>
+
+        <!-- Type Toggle: Income / Expense -->
+        <div class="form-group">
+          <label>Type</label>
+          <div class="type-toggle" role="group" aria-label="Transaction type">
+            <input type="radio" name="tx-type" id="type-income"  value="income"  checked />
+            <label for="type-income"  id="label-income">⬆ Income</label>
+
+            <input type="radio" name="tx-type" id="type-expense" value="expense" />
+            <label for="type-expense" id="label-expense">⬇ Expense</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-add">+ Add Transaction</button>
+      </form>
+    </section>
+
+    <!-- ── Transaction History Card ── -->
+    <section class="card history-card" aria-label="Transaction history">
+      <p class="section-title">History</p>
+
+      <!-- Empty state placeholder -->
+      <div class="empty-state" id="empty-state" aria-live="polite">
+        <div class="empty-icon">📭</div>
+        <p>No transactions yet.<br />Add one above to get started!</p>
+      </div>
+
+      <!-- Live transaction list -->
+      <ul id="transaction-list" aria-label="Transaction list" aria-live="polite"></ul>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">Data saved automatically in your browser.</footer>
+  </div>
+
+  <!-- ============================================================
+       JAVASCRIPT LOGIC
+       ============================================================ -->
+  <script>
+    'use strict';
+
+    /* ------------------------------------------------------------------
+     * CONSTANTS & STATE
+     * ------------------------------------------------------------------ */
+
+    /** localStorage key for persisting transactions */
+    const STORAGE_KEY = 'et_transactions_v1';
+
+    /**
+     * In-memory array of transaction objects.
+     * Shape: { id: string, desc: string, amount: number, type: 'income'|'expense', date: string }
+     */
+    let transactions = [];
+
+    /* ------------------------------------------------------------------
+     * DOM REFERENCES
+     * ------------------------------------------------------------------ */
+    const form         = document.getElementById('transaction-form');
+    const inputDesc    = document.getElementById('tx-desc');
+    const inputAmount  = document.getElementById('tx-amount');
+    const errDesc      = document.getElementById('err-desc');
+    const errAmount    = document.getElementById('err-amount');
+    const totalBalEl   = document.getElementById('total-balance');
+    const totalIncEl   = document.getElementById('total-income');
+    const totalExpEl   = document.getElementById('total-expense');
+    const txList       = document.getElementById('transaction-list');
+    const emptyState   = document.getElementById('empty-state');
+
+    /* ------------------------------------------------------------------
+     * UTILITY HELPERS
+     * ------------------------------------------------------------------ */
+
+    /**
+     * Format a numeric value as a USD currency string.
+     * @param {number} amount
+     * @returns {string} e.g. "$1,234.56"
+     */
+    const formatCurrency = (amount) =>
+      new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+
+    /**
+     * Format a Date object to a short readable string.
+     * @param {string} isoString
+     * @returns {string} e.g. "Oct 2, 2026"
+     */
+    const formatDate = (isoString) =>
+      new Date(isoString).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric',
+      });
+
+    /**
+     * Generate a unique ID using crypto.randomUUID with a Date fallback.
+     * @returns {string}
+     */
+    const generateId = () =>
+      (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    /* ------------------------------------------------------------------
+     * LOCAL STORAGE  (Persistence Layer)
+     * ------------------------------------------------------------------ */
+
+    /** Persist the current transactions array to localStorage. */
+    function saveToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+      } catch (err) {
+        console.warn('localStorage write failed:', err);
+      }
+    }
+
+    /**
+     * Load transactions from localStorage.
+     * Falls back to an empty array if nothing is stored or parsing fails.
+     */
+    function loadFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        transactions = raw ? JSON.parse(raw) : [];
+      } catch (err) {
+        console.warn('localStorage read failed; starting fresh.', err);
+        transactions = [];
+      }
+    }
+
+    /* ------------------------------------------------------------------
+     * CALCULATIONS
+     * ------------------------------------------------------------------ */
+
+    /**
+     * Compute summary totals from the transactions array.
+     * @returns {{ income: number, expense: number, balance: number }}
+     */
+    function calcTotals() {
+      return transactions.reduce(
+        (acc, tx) => {
+          if (tx.type === 'income') {
+            acc.income += tx.amount;
+          } else {
+            acc.expense += tx.amount;
+          }
+          acc.balance = acc.income - acc.expense;
+          return acc;
+        },
+        { income: 0, expense: 0, balance: 0 }
+      );
+    }
+
+    /* ------------------------------------------------------------------
+     * RENDER  (DOM Manipulation)
+     * ------------------------------------------------------------------ */
+
+    /** Update the three dashboard figures and colour-code the total balance. */
+    function renderDashboard() {
+      const { income, expense, balance } = calcTotals();
+
+      totalBalEl.textContent = formatCurrency(balance);
+      totalIncEl.textContent = formatCurrency(income);
+      totalExpEl.textContent = formatCurrency(expense);
+
+      // Colour-code total balance
+      totalBalEl.classList.toggle('positive', balance > 0);
+      totalBalEl.classList.toggle('negative', balance < 0);
+    }
+
+    /**
+     * Build and return a <li> element for a single transaction.
+     * @param {{ id: string, desc: string, amount: number, type: string, date: string }} tx
+     * @returns {HTMLLIElement}
+     */
+    function createTransactionEl(tx) {
+      const li = document.createElement('li');
+      li.className = `transaction-item ${tx.type}`;
+      li.dataset.id = tx.id;
+
+      /* Amount prefix: + for income, − for expense */
+      const sign   = tx.type === 'income' ? '+' : '−';
+      const amount = formatCurrency(tx.amount);
+
+      li.innerHTML = `
+        <div class="tx-info">
+          <p class="tx-desc" title="${escapeHtml(tx.desc)}">${escapeHtml(tx.desc)}</p>
+          <p class="tx-date">${formatDate(tx.date)}</p>
+        </div>
+        <span class="tx-amount">${sign}${amount}</span>
+        <button
+          class="btn-delete"
+          aria-label="Delete transaction: ${escapeHtml(tx.desc)}"
+          data-id="${tx.id}"
+        >✕</button>
+      `;
+
+      return li;
+    }
+
+    /**
+     * Re-render the full transaction list from the in-memory array.
+     * Most-recent transactions appear first.
+     */
+    function renderList() {
+      // Clear existing list nodes
+      txList.innerHTML = '';
+
+      if (transactions.length === 0) {
+        emptyState.classList.add('visible');
+        return;
+      }
+
+      emptyState.classList.remove('visible');
+
+      // Sort by date descending (newest first)
+      const sorted = [...transactions].sort(
+        (a, b) => new Date(b.date) - new Date(a.date)
+      );
+
+      // Build and append each item
+      const fragment = document.createDocumentFragment();
+      sorted.forEach((tx) => fragment.appendChild(createTransactionEl(tx)));
+      txList.appendChild(fragment);
+    }
+
+    /**
+     * Full render pass: update both the dashboard and the list.
+     * Call this any time the transactions array mutates.
+     */
+    function render() {
+      renderDashboard();
+      renderList();
+    }
+
+    /* ------------------------------------------------------------------
+     * SECURITY HELPER
+     * ------------------------------------------------------------------ */
+
+    /**
+     * Escape potentially unsafe characters before inserting into innerHTML.
+     * Prevents stored-XSS from user-supplied description text.
+     * @param {string} str
+     * @returns {string}
+     */
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g,  '&amp;')
+        .replace(/</g,  '&lt;')
+        .replace(/>/g,  '&gt;')
+        .replace(/"/g,  '&quot;')
+        .replace(/'/g,  '&#039;');
+    }
+
+    /* ------------------------------------------------------------------
+     * VALIDATION
+     * ------------------------------------------------------------------ */
+
+    /**
+     * Validate the form fields.
+     * Shows inline error messages and returns true only when all fields pass.
+     * @returns {boolean}
+     */
+    function validateForm() {
+      let valid = true;
+      const desc   = inputDesc.value.trim();
+      const amount = parseFloat(inputAmount.value);
+
+      /* Description validation */
+      if (!desc) {
+        errDesc.classList.add('visible');
+        inputDesc.focus();
+        valid = false;
+      } else {
+        errDesc.classList.remove('visible');
+      }
+
+      /* Amount validation */
+      if (isNaN(amount) || amount <= 0) {
+        errAmount.classList.add('visible');
+        if (valid) inputAmount.focus(); // only steal focus if desc passed
+        valid = false;
+      } else {
+        errAmount.classList.remove('visible');
+      }
+
+      return valid;
+    }
+
+    /* ------------------------------------------------------------------
+     * ACTIONS
+     * ------------------------------------------------------------------ */
+
+    /**
+     * Add a new transaction to the array, persist it, and re-render.
+     * @param {string} desc
+     * @param {number} amount
+     * @param {'income'|'expense'} type
+     */
+    function addTransaction(desc, amount, type) {
+      const tx = {
+        id:     generateId(),
+        desc:   desc,
+        amount: parseFloat(amount.toFixed(2)),
+        type:   type,
+        date:   new Date().toISOString(),
+      };
+
+      transactions.push(tx);
+      saveToStorage();
+      render();
+    }
+
+    /**
+     * Remove a transaction by its id, persist the change, and re-render.
+     * @param {string} id
+     */
+    function deleteTransaction(id) {
+      transactions = transactions.filter((tx) => tx.id !== id);
+      saveToStorage();
+      render();
+    }
+
+    /* ------------------------------------------------------------------
+     * EVENT LISTENERS
+     * ------------------------------------------------------------------ */
+
+    /* Form submit → add transaction */
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      if (!validateForm()) return;
+
+      const desc   = inputDesc.value.trim();
+      const amount = parseFloat(inputAmount.value);
+      const type   = document.querySelector('input[name="tx-type"]:checked').value;
+
+      addTransaction(desc, amount, type);
+
+      /* Reset only the text/number fields; keep the type radio as-is */
+      inputDesc.value   = '';
+      inputAmount.value = '';
+      inputDesc.focus();
+    });
+
+    /* Clear validation errors on input */
+    inputDesc.addEventListener('input',   () => errDesc.classList.remove('visible'));
+    inputAmount.addEventListener('input', () => errAmount.classList.remove('visible'));
+
+    /* Transaction list: delete via event delegation */
+    txList.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-delete');
+      if (!btn) return;
+
+      const id = btn.dataset.id;
+      if (id) deleteTransaction(id);
+    });
+
+    /* ------------------------------------------------------------------
+     * INIT — load persisted data and paint the UI
+     * ------------------------------------------------------------------ */
+    (function init() {
+      loadFromStorage();
+      render();
+    })();
+  </script>
+</body>
+</html>
