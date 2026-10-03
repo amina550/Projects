@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A modern weather app powered by Open-Meteo" />
+  <title>WeatherNow 🌤️</title>
+
+  <!-- Preconnect for performance: Open-Meteo geocoding & forecast APIs -->
+  <link rel="preconnect" href="https://geocoding-api.open-meteo.com" />
+  <link rel="preconnect" href="https://api.open-meteo.com" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- =============================================
+       APP WRAPPER
+       ============================================= -->
+  <div class="app-wrapper">
+
+    <!-- Header -->
+    <header class="app-header">
+      <h1 class="app-title">
+        <span class="app-title__icon" aria-hidden="true">🌤️</span>
+        WeatherNow
+      </h1>
+      <p class="app-subtitle">Real-time weather for any city, powered by Open-Meteo</p>
+    </header>
+
+    <!-- =============================================
+         SEARCH FORM
+         ============================================= -->
+    <form class="search-form" id="searchForm" role="search" aria-label="Search for a city">
+      <div class="search-form__inner">
+        <label for="cityInput" class="sr-only">City name</label>
+        <input
+          type="search"
+          id="cityInput"
+          class="search-form__input"
+          placeholder="Enter city name…"
+          autocomplete="off"
+          aria-required="true"
+          spellcheck="false"
+        />
+        <button type="submit" class="search-form__btn" aria-label="Search weather">
+          <svg class="search-form__btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <span>Search</span>
+        </button>
+      </div>
+    </form>
+
+    <!-- =============================================
+         STATUS / ERROR MESSAGE
+         ============================================= -->
+    <div class="status-message" id="statusMessage" role="alert" aria-live="polite" hidden>
+      <span class="status-message__icon" aria-hidden="true"></span>
+      <span class="status-message__text"></span>
+    </div>
+
+    <!-- =============================================
+         LOADING SKELETON
+         ============================================= -->
+    <div class="skeleton-card" id="skeletonCard" aria-hidden="true" hidden>
+      <div class="skeleton skeleton--title"></div>
+      <div class="skeleton skeleton--icon"></div>
+      <div class="skeleton skeleton--temp"></div>
+      <div class="skeleton skeleton--row"></div>
+      <div class="skeleton skeleton--row skeleton--row-short"></div>
+    </div>
+
+    <!-- =============================================
+         WEATHER RESULT CARD
+         ============================================= -->
+    <article class="weather-card" id="weatherCard" aria-label="Weather result" hidden>
+
+      <!-- Location & Date -->
+      <div class="weather-card__location">
+        <h2 class="weather-card__city" id="wCity"></h2>
+        <p class="weather-card__date" id="wDate"></p>
+      </div>
+
+      <!-- Weather Icon & Description -->
+      <div class="weather-card__hero">
+        <div class="weather-card__icon-wrap" id="wIconWrap" aria-hidden="true"></div>
+        <p class="weather-card__description" id="wDescription"></p>
+      </div>
+
+      <!-- Temperature -->
+      <div class="weather-card__temperature">
+        <span class="weather-card__temp-value" id="wTemp"></span>
+        <!-- Unit toggle -->
+        <div class="unit-toggle" role="group" aria-label="Temperature unit">
+          <button class="unit-toggle__btn unit-toggle__btn--active" id="btnCelsius" data-unit="C" aria-pressed="true">°C</button>
+          <span class="unit-toggle__divider" aria-hidden="true">/</span>
+          <button class="unit-toggle__btn" id="btnFahrenheit" data-unit="F" aria-pressed="false">°F</button>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="weather-card__stats">
+
+        <div class="stat-tile">
+          <span class="stat-tile__icon" aria-hidden="true">💧</span>
+          <span class="stat-tile__label">Humidity</span>
+          <span class="stat-tile__value" id="wHumidity">—</span>
+        </div>
+
+        <div class="stat-tile">
+          <span class="stat-tile__icon" aria-hidden="true">💨</span>
+          <span class="stat-tile__label">Wind Speed</span>
+          <span class="stat-tile__value" id="wWind">—</span>
+        </div>
+
+        <div class="stat-tile">
+          <span class="stat-tile__icon" aria-hidden="true">👁️</span>
+          <span class="stat-tile__label">Visibility</span>
+          <span class="stat-tile__value" id="wVisibility">—</span>
+        </div>
+
+        <div class="stat-tile">
+          <span class="stat-tile__icon" aria-hidden="true">🌡️</span>
+          <span class="stat-tile__label">Feels Like</span>
+          <span class="stat-tile__value" id="wFeelsLike">—</span>
+        </div>
+
+      </div>
+
+      <!-- 5-Day Forecast strip -->
+      <section class="forecast-strip" aria-label="5-day forecast">
+        <h3 class="forecast-strip__title">5-Day Forecast</h3>
+        <div class="forecast-strip__list" id="forecastList" role="list"></div>
+      </section>
+
+    </article>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a> — free &amp; open-source</p>
+    </footer>
+
+  </div><!-- /.app-wrapper -->
+
+  <script src="app.js"></script>
+</body>
+</html>
