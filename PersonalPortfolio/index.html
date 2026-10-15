@@ -20,11 +20,12 @@
         <span class="logo-bracket">&lt;</span>Amina<span class="logo-bracket">/&gt;</span>
       </a>
       <nav class="nav-links" id="navLinks">
-        <a href="#home"     class="nav-link active">Home</a>
-        <a href="#about"    class="nav-link">About</a>
-        <a href="#skills"   class="nav-link">Skills</a>
-        <a href="#projects" class="nav-link">Projects</a>
-        <a href="#contact"  class="nav-link">Contact</a>
+        <a href="#home"      class="nav-link active">Home</a>
+        <a href="#about"     class="nav-link">About</a>
+        <a href="#skills"    class="nav-link">Skills</a>
+        <a href="#projects"  class="nav-link">Projects</a>
+        <a href="#100days"   class="nav-link">100 Days</a>
+        <a href="#contact"   class="nav-link">Contact</a>
       </nav>
       <button class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -422,7 +423,47 @@
     </div>
   </section>
 
+  <!-- ============ 100 DAYS OF CODE ============ -->
+  <section class="days100 section" id="100days">
+    <div class="container">
+      <div class="section-header" data-animate="fade-up">
+        <span class="section-tag">Challenge</span>
+        <h2 class="section-title">100 Days of Code</h2>
+        <p class="section-desc">Building one project every day for 100 consecutive days — watch this space grow!</p>
+      </div>
+
+      <!-- Progress banner -->
+      <div class="days100-banner" data-animate="fade-up">
+        <div class="days100-stat">
+          <span class="days100-stat-num" id="daysCompleted">0</span>
+          <span class="days100-stat-label">Days Done</span>
+        </div>
+        <div class="days100-progress-wrap">
+          <div class="days100-progress-bar">
+            <div class="days100-progress-fill" id="days100Fill" style="width:0%"></div>
+          </div>
+          <span class="days100-progress-label"><span id="days100Pct">0</span>% complete</span>
+        </div>
+        <div class="days100-stat">
+          <span class="days100-stat-num">100</span>
+          <span class="days100-stat-label">Total Days</span>
+        </div>
+      </div>
+
+      <!-- Grid of 100 day cards -->
+      <div class="days100-grid" id="days100Grid">
+        <!-- Cards injected by JS -->
+      </div>
+
+      <p class="days100-note" data-animate="fade-up">
+        🔥 Challenge started · Each card will be filled as I complete that day's project.
+        Follow along on <a href="https://github.com/amina550" target="_blank" rel="noopener noreferrer">GitHub</a>!
+      </p>
+    </div>
+  </section>
+
   <!-- ============ CONTACT ============ -->
+
   <section class="contact section" id="contact">
     <div class="container">
       <div class="section-header" data-animate="fade-up">

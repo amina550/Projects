@@ -219,3 +219,130 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 });
+
+
+/* ── 9. 100 DAYS OF CODE — card generator ── */
+
+/**
+ * CONFIGURATION — update as you build each day:
+ *
+ *   DAYS_DONE  : total days fully completed (0–100)
+ *   TODAY_DAY  : the day you are currently working on (1–100), 0 = not started
+ *
+ *   COMPLETED_PROJECTS : object keyed by day number (1-based).
+ *     Each entry: { title, emoji, url }
+ *       title — project name shown in the tooltip
+ *       emoji — icon shown on the card
+ *       url   — link opened when the card is clicked (GitHub repo or live demo)
+ *
+ *  Example entries (uncomment & fill in as you go):
+ *   1: { title: 'To-Do List',     emoji: '📋', url: 'https://github.com/amina550/Projects/tree/main/Todo-list' },
+ *   2: { title: 'Grade Calc',     emoji: '🧮', url: 'https://gradecalculator-pink.vercel.app/' },
+ *   3: { title: 'Weather App',    emoji: '🌤️', url: 'https://weather-app-puce-two-67.vercel.app/' },
+ */
+const DAYS_DONE  = 8;   // ← bump this every time you finish a day
+const TODAY_DAY  = 9;   // ← set to your current day (1–100), 0 if not started yet
+
+const COMPLETED_PROJECTS = {
+  // ── Fill in each entry as: { title, emoji, url }
+  // url can be a live demo OR a GitHub link — whichever best shows the project.
+  // ─────────────────────────────────────────────────────────────────────────────
+  1: { title: 'Grade Calculator',       emoji: '🧮', url: 'https://gradecalculator-pink.vercel.app/' },
+  2: { title: 'To-Do List',            emoji: '📋', url: 'https://amina-pp.vercel.app/' },
+  3: { title: 'Sorting Algorithm Viz', emoji: '🔢', url: 'https://github.com/amina550/Projects' },
+  4: { title: 'Weather App',           emoji: '🌤️', url: 'https://weather-app-puce-two-67.vercel.app/' },
+  5: { title: 'Quran App',             emoji: '📖', url: 'https://quranapp-beta.vercel.app/' },
+  6: { title: 'Expense Tracker',       emoji: '💰', url: 'https://expensetracker-zeta-steel.vercel.app/' },
+  8: { title: 'Fullstack Day 1',       emoji: '🌐', url: 'https://100days-of-fullstuck-day-1.vercel.app/' },
+  // 9:  { title: 'Your Day 9 project',  emoji: '🚀', url: 'https://your-project-link.com' },
+  // 10: { title: 'Your Day 10 project', emoji: '💡', url: 'https://your-project-link.com' },
+  // ── Keep adding one line per day as you build! ──────────────────────────────
+};
+
+
+
+const TOTAL_DAYS = 100;
+
+(function buildDaysGrid() {
+  const grid        = document.getElementById('days100Grid');
+  const fillEl      = document.getElementById('days100Fill');
+  const pctEl       = document.getElementById('days100Pct');
+  const doneCountEl = document.getElementById('daysCompleted');
+
+  if (!grid) return;
+
+  for (let i = 1; i <= TOTAL_DAYS; i++) {
+    const project   = COMPLETED_PROJECTS[i];
+    const isDone    = (i < TODAY_DAY || i <= DAYS_DONE);
+    const isToday   = (i === TODAY_DAY && TODAY_DAY > 0);
+    const hasLink   = isDone && project && project.url;
+
+    // Use <a> for linked completed cards, <div> for everything else
+    const card = document.createElement(hasLink ? 'a' : 'div');
+    card.className = 'day-card';
+
+    if (hasLink) {
+      card.href   = project.url;
+      card.target = '_blank';
+      card.rel    = 'noopener noreferrer';
+    }
+
+    // Day number
+    const numSpan = document.createElement('span');
+    numSpan.className   = 'day-num';
+    numSpan.textContent = i;
+
+    // Icon
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'day-icon';
+
+    if (isDone) {
+      card.classList.add('day-done');
+      iconSpan.textContent = project ? project.emoji : '✅';
+      card.title = project
+        ? `Day ${i}: ${project.title}${project.url ? ' — click to open ↗' : ''}`
+        : `Day ${i}: Done!`;
+      if (hasLink) card.classList.add('day-linked');
+    } else if (isToday) {
+      card.classList.add('day-today');
+      iconSpan.textContent = '🔥';
+      card.title = `Day ${i}: In progress…`;
+    } else {
+      card.classList.add('day-todo');
+      iconSpan.textContent = '⬜';
+      card.title = `Day ${i}: Coming soon`;
+    }
+
+    card.appendChild(numSpan);
+    card.appendChild(iconSpan);
+
+    // Small launch badge for linked cards
+    if (hasLink) {
+      const badge = document.createElement('span');
+      badge.className   = 'day-link-badge';
+      badge.textContent = '↗';
+      card.appendChild(badge);
+    }
+
+    grid.appendChild(card);
+  }
+
+  // Animate progress bar when section scrolls into view
+  const section = document.getElementById('100days');
+  if (!section) return;
+
+  const pct = Math.round((DAYS_DONE / TOTAL_DAYS) * 100);
+  const obs100 = new IntersectionObserver(
+    (entries) => {
+      if (!entries[0].isIntersecting) return;
+      setTimeout(() => {
+        fillEl.style.width      = pct + '%';
+        pctEl.textContent       = pct;
+        doneCountEl.textContent = DAYS_DONE;
+      }, 300);
+      obs100.unobserve(section);
+    },
+    { threshold: 0.2 }
+  );
+  obs100.observe(section);
+})();

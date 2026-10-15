@@ -849,6 +849,192 @@ button { border: none; cursor: pointer; font-family: inherit; }
   transform: none;
 }
 
+/* ---- 13. 100 DAYS OF CODE ---- */
+.days100 { background: var(--clr-bg); }
+
+/* Progress banner */
+.days100-banner {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-xl);
+  padding: 32px 40px;
+  margin-bottom: 56px;
+}
+.days100-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+.days100-stat-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.6rem;
+  font-weight: 800;
+  background: var(--grad-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+}
+.days100-stat-label {
+  font-size: 0.75rem;
+  color: var(--clr-text-muted);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.days100-progress-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.days100-progress-bar {
+  width: 100%;
+  height: 12px;
+  background: var(--clr-surface-2);
+  border-radius: 50px;
+  overflow: hidden;
+}
+.days100-progress-fill {
+  height: 100%;
+  background: var(--grad-primary);
+  border-radius: 50px;
+  transition: width 1.4s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 0 14px rgba(108,99,255,0.5);
+}
+.days100-progress-label {
+  font-size: 0.82rem;
+  color: var(--clr-text-muted);
+  text-align: center;
+}
+
+/* Day card grid */
+.days100-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 10px;
+  margin-bottom: 48px;
+}
+
+.day-card {
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--clr-border);
+  background: var(--clr-surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: default;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.day-card:hover {
+  border-color: rgba(108,99,255,0.5);
+  transform: scale(1.08);
+  z-index: 2;
+  box-shadow: 0 8px 24px rgba(108,99,255,0.2);
+}
+.day-card .day-num {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--clr-text-muted);
+  line-height: 1;
+}
+.day-card .day-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* States */
+.day-card.day-done {
+  background: linear-gradient(135deg, rgba(108,99,255,0.18), rgba(255,99,195,0.12));
+  border-color: rgba(108,99,255,0.4);
+}
+.day-card.day-done .day-num { color: var(--clr-primary); }
+
+.day-card.day-today {
+  border: 2px solid var(--clr-primary);
+  background: rgba(108,99,255,0.12);
+  animation: todayPulse 2s ease-in-out infinite;
+}
+@keyframes todayPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(108,99,255,0.4); }
+  50%      { box-shadow: 0 0 0 6px rgba(108,99,255,0); }
+}
+
+.day-card.day-todo {
+  opacity: 0.45;
+}
+.day-card.day-todo:hover { opacity: 1; }
+
+/* Linked (clickable) completed cards */
+.day-card.day-linked {
+  cursor: pointer;
+  text-decoration: none;
+}
+.day-card.day-linked:hover {
+  border-color: var(--clr-primary);
+  background: linear-gradient(135deg, rgba(108,99,255,0.28), rgba(255,99,195,0.18));
+  transform: scale(1.12);
+  box-shadow: 0 10px 28px rgba(108,99,255,0.35);
+}
+
+/* ↗ launch badge — hidden by default, shown on hover */
+.day-link-badge {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--clr-primary);
+  opacity: 0;
+  transition: opacity var(--transition);
+  line-height: 1;
+}
+.day-card.day-linked:hover .day-link-badge { opacity: 1; }
+
+
+
+/* Tooltip on hover */
+.day-card[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--clr-surface-2);
+  border: 1px solid var(--clr-border);
+  color: var(--clr-text);
+  font-size: 0.7rem;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Bottom note */
+.days100-note {
+  text-align: center;
+  color: var(--clr-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+.days100-note a {
+  color: var(--clr-primary);
+  font-weight: 600;
+}
+.days100-note a:hover { text-decoration: underline; }
+
+
+
 /* ---- 13. RESPONSIVE — Tablet ---- */
 @media (max-width: 900px) {
   .hero-content {
@@ -869,6 +1055,11 @@ button { border: none; cursor: pointer; font-family: inherit; }
   .about-img-wrapper { max-width: 340px; }
 
   .contact-grid { grid-template-columns: 1fr; }
+
+  .days100-grid { grid-template-columns: repeat(10, 1fr); gap: 7px; }
+  .days100-banner { flex-direction: column; gap: 20px; padding: 24px; }
+  .days100-progress-wrap { width: 100%; }
+
 
   .nav-links {
     display: none;
@@ -900,6 +1091,8 @@ button { border: none; cursor: pointer; font-family: inherit; }
   .contact-form, .contact-card-info { padding: 24px; }
   .skills-grid { grid-template-columns: 1fr; }
   .projects-grid { grid-template-columns: 1fr; }
+  .days100-grid { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+
 }
 
 /* ---- 15. REDUCED MOTION ---- */
